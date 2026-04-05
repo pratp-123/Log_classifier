@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Log Classifier</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09111a;
+      --panel: rgba(255,255,255,0.08);
+      --panel-strong: rgba(255,255,255,0.12);
+      --border: rgba(255,255,255,0.16);
+      --text: #f5f8ff;
+      --muted: #b8c4d2;
+      --accent: #7c84ff;
+      --accent-strong: #5a63ff;
+      --shadow: 0 30px 90px rgba(0,0,0,0.32);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top left, rgba(124,132,255,.18), transparent 28%),
+                  radial-gradient(circle at bottom right, rgba(17,255,209,.12), transparent 24%),
+                  linear-gradient(180deg, #06111e 0%, #0b1624 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+    }
+
+    .window {
+      width: min(760px, 100%);
+      backdrop-filter: blur(24px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .window-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .window-header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2vw, 2.4rem);
+      letter-spacing: -0.03em;
+    }
+
+    .window-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .help-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .help-link:hover {
+      color: var(--accent-strong);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px;
+      padding: 2rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .field label {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .file-input {
+      display: block;
+      width: 100%;
+      padding: 1rem 1rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .file-input:hover {
+      border-color: rgba(124,132,255,0.56);
+      transform: translateY(-1px);
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      padding: 1rem 1.8rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 16px 40px rgba(92,99,255,0.34);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 22px 46px rgba(92,99,255,0.42);
+      filter: saturate(1.1);
+    }
+
+    .status,
+    .download-link {
+      border-radius: 18px;
+      padding: 1rem 1.25rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      min-height: 2.8rem;
+    }
+
+    .download-link a {
+      color: #d6e1ff;
+      text-decoration: none;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 520px) {
+      .window {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="window">
+    <div class="window-header">
+      <div>
+        <h1>Log Classifier</h1>
+        <p>Upload a CSV with <strong>source</strong> and <strong>log_message</strong> columns.</p>
+      </div>
+      <a href="/help" class="help-link">Help</a>
+    </div>
+
+    <div class="card">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="field">
+          <label for="csvfile">CSV file</label>
+          <input id="csvfile" name="file" type="file" accept=".csv" class="file-input" />
+        </div>
+
+        <div class="button-row">
+          <button type="submit">Upload and Classify</button>
+        </div>
+      </form>
+
+      <div class="status" id="status">Select a CSV file to begin.</div>
+      <div class="download-link" id="downloadLink"></div>
+    </div>
+
+    <div class="footer">Powered by FastAPI • Upload to classify logs in real time</div>
+  </section>
+
+  <script>
+    const API_URL = '/classify/';
+    const status = document.getElementById('status');
+    const downloadLink = document.getElementById('downloadLink');
+
+    document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      downloadLink.innerHTML = '';
+      const fileInput = document.getElementById('csvfile');
+      if (!fileInput.files.length) {
+        status.textContent = 'Please select a CSV file.';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      status.textContent = 'Uploading...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const detail = await response.text();
+          throw new Error(`${response.status}: ${detail}`);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'output.csv';
+        anchor.textContent = 'Download classified CSV';
+        downloadLink.appendChild(anchor);
+        status.textContent = 'Classification complete. Download the result below.';
+      } catch (error) {
+        status.textContent = 'Error: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
