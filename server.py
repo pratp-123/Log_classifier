@@ -71,12 +71,14 @@ async def categories():
     counts = df["target_label"].fillna("Unclassified").value_counts().to_dict()
     total = int(df.shape[0])
     return {"total": total, "counts": counts}
+
+
+    
 # Add this at the bottom of the file
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=port,
-        reload=True
+        port=port
     )
