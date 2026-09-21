@@ -3,7 +3,6 @@ from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 import os
-from classify import classify
 from pathlib import Path
 
 app = FastAPI()
@@ -34,6 +33,7 @@ async def classify_logs(file: UploadFile):
             raise HTTPException(status_code=400, detail="CSV must contain 'source' and 'log_message' columns.")
 
         # Perform classification
+        from classify import classify
         df["target_label"] = classify(list(zip(df["source"], df["log_message"])))
 
         print("Dataframe:",df.to_dict())
